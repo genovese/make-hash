@@ -1,0 +1,1360 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>User Guide for Common Lisp Package <code>make-hash</code></title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="30 Jun 2012\vspace*{-0.5cm}"/>
+<meta name="author" content="Christopher Genovese (=genovese@cmu.edu=)"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">User Guide for Common Lisp Package <code>make-hash</code></h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Motivation and Overview </a></li>
+<li><a href="#sec-2">2 Installation </a></li>
+<li><a href="#sec-3">3 Examples </a></li>
+<li><a href="#sec-4">4 Creating Hash Tables </a>
+<ul>
+<li><a href="#sec-4-1">4.1 Functions as <code>:init-data</code> (or <code>:initial-contents</code>) </a></li>
+<li><a href="#sec-4-2">4.2 Predefined Initialization Formats </a></li>
+</ul>
+</li>
+<li><a href="#sec-5">5 Defining Custom Initialization Formats </a></li>
+<li><a href="#sec-6">6 Specifying Default Formats </a></li>
+<li><a href="#sec-7">7 Hash Table Factories </a></li>
+<li><a href="#sec-8">8 Reader Representations </a></li>
+<li><a href="#sec-9">9 Dictionary </a>
+<ul>
+<li><a href="#sec-9-1">9.1 make-hash [Function] </a></li>
+<li><a href="#sec-9-2">9.2 make-hash-transformer [Function] </a></li>
+<li><a href="#sec-9-3">9.3 initialize-hash [Generic Function] </a></li>
+<li><a href="#sec-9-4">9.4 hash-initializer-default-format [Generic Function] </a></li>
+<li><a href="#sec-9-5">9.5 <code>*hash-factory-defaults*</code> [Special Variable] </a></li>
+<li><a href="#sec-9-6">9.6 define-hash-factory [Macro] </a></li>
+<li><a href="#sec-9-7">9.7 make-hash-factory [Function] </a></li>
+<li><a href="#sec-9-8">9.8 install-hash-reader [Macro] </a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Motivation and Overview </h2>
+<div class="outline-text-2" id="text-1">
+
+
+<p>
+  Two common (and arguably apt) criticisms of hash tables in Common Lisp are
+  that hash table initialization is bulky and awkward and that the
+  representation of hash tables is not as integrated into the language as are
+  the representations of lists and (to a degree) vectors.
+</p>
+<p>
+  The <code>make-hash</code> package addresses these issues by supplying three
+  useful, related mechanisms:
+</p>
+<ol>
+<li>A hash table constructor <code>make-hash</code> with initialization that is
+       concise, flexible, and extensible.
+
+<p>
+       See <code>make-hash</code>, <code>initialize-hash</code>, <code>hash-initializer-default-format</code>,
+       and <code>make-hash-transformer</code> below.
+</p>
+</li>
+<li>Methods for defining hash-table factories with a customized
+       set of initialization options, either as a globally or locally
+       defined function.
+
+<p>
+       See <code>define-hash-factory</code>, <code>make-hash-factory</code>, and \newline
+       <code>*hash-factory-defaults*</code> below.
+</p>
+</li>
+<li>Readtable installers for defining a portable reader interface to
+       the hash-table factories, either as (raw) delimited or dispatched
+       reader macros.
+
+<p>       
+       See <code>install-hash-reader</code> below.
+</p></li>
+</ol>
+
+
+<p>
+  In particular, the function <code>make-hash</code> is a wrapper around the standard
+  CL function <code>make-hash-table</code> with some additional keyword arguments
+  that allow one to specify initial contents and format.
+</p>
+<p>
+  As an illustation, consider the example on page 440 of the venerable
+  <i>Common Lisp the Language, Second Edition</i> by Guy Steele [CLtL2].
+</p>
+
+
+
+<pre class="src src-lisp">(setq turtles (make-hash-table <span style="color: #7a378b;">:size</span> 9 <span style="color: #7a378b;">:test</span> 'eq))
+(setf (gethash 'howard-kaylan turtles) '(musician lead-singer))
+(setf (gethash 'john-barbata turtles) '(musician drummer))
+(setf (gethash 'leonardo turtles) '(ninja leader blue))
+(setf (gethash 'donatello turtles) '(ninja machines purple))
+(setf (gethash 'al-nichol turtles) '(musician guitarist))
+(setf (gethash 'mark-volman turtles) '(musician great-hair))
+(setf (gethash 'raphael turtles) '(ninja cool rude red))
+(setf (gethash 'michaelangelo turtles) '(ninja party-dude orange))
+(setf (gethash 'jim-pons turtles) '(musician bassist))
+
+(<span style="color: #7f007f;">do-something</span> turtles)
+</pre>
+
+
+
+
+<p>
+  This is not horrible, but its 10 lines are mostly repeated boiler plate code that
+  visually obscures the relationships in the table. And if this
+  were a local definition, as in a let, even more syntactic infrastructure would
+  be required (i.e., another level of let). Compare the above with
+</p>
+
+
+
+<pre class="src src-lisp">(make-hash <span style="color: #7a378b;">:size</span> 9 <span style="color: #7a378b;">:test</span> 'eq
+           <span style="color: #7a378b;">:initial-contents</span> '(howard-kaylan (musician lead-singer)
+                               jon-barbata   (musician drummer)
+                               leonardo      (ninja leader blue)
+                               donatello     (ninja machines purple)
+                               al-nichol     (musician guitarist)
+                               mark-volman   (musician great-hair)
+                               raphael       (ninja cool rude red)
+                               michaelangelo (ninja party-dude orange)
+                               jim-pons      (musician bassist)))
+</pre>
+
+
+
+
+<p>
+  or, for example, with
+</p>
+
+
+
+<pre class="src src-lisp">(make-hash <span style="color: #7a378b;">:size</span> 9 <span style="color: #7a378b;">:test</span> 'eq <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:lists</span>
+           <span style="color: #7a378b;">:initial-contents</span> '((howard-kaylan (musician lead-singer))
+                               (jon-barbata   (musician drummer))
+                               (leonardo      (ninja leader blue))
+                               (donatello     (ninja machines purple))
+                               (al-nichol     (musician guitarist))
+                               (mark-volman   (musician great-hair))
+                               (raphael       (ninja cool rude red))
+                               (michaelangelo (ninja party-dude orange))
+                               (jim-pons      (musician bassist))))
+</pre>
+
+
+
+
+<p>
+  or with
+</p>
+
+
+
+<pre class="src src-lisp">(make-hash <span style="color: #7a378b;">:size</span> 9 <span style="color: #7a378b;">:test</span> 'eq <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:keychain</span>
+           <span style="color: #7a378b;">:initial-contents</span>
+           '(howard-kaylan jon-barbata leonardo
+             donatello al-nichol mark-volman
+             raphael michaelangelo jim-pons)
+           <span style="color: #7a378b;">:init-data</span>
+           '((musician lead-singer) (musician drummer) (ninja leader blue)
+             (ninja machines purple) (musician guitarist) (musician great-hair)
+             (ninja cool rude red) (ninja party-dude orange) (musician bassist)))
+</pre>
+
+
+
+
+<p>
+  or even with
+</p>
+
+
+
+<pre class="src src-lisp">#{ howard-kaylan (musician lead-singer)
+   jon-barbata   (musician drummer)
+   leonardo      (ninja leader blue)
+   donatello     (ninja machines purple)
+   al-nichol     (musician guitarist)
+   mark-volman   (musician great-hair)
+   raphael       (ninja cool rude red)
+   michaelangelo (ninja party-dude orange)
+   jim-pons      (musician bassist) }
+</pre>
+
+
+
+
+<p>
+  There are many other formats for the initial contents that would be
+  convenient to use in other contexts, and make-hash supports a wide
+  variety of them. Moreover, custom formats can be supported easily by
+  defining a method for a single generic function, and default formats
+  can be adjusted similarly. See below for more detail and examples.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Installation </h2>
+<div class="outline-text-2" id="text-2">
+
+
+<p>
+  The simplest approach is to use quicklisp (www.quicklisp.org).
+  With quicklisp installed, simply call <code>(ql:quickload "make-hash")</code>
+  and quicklisp will do the rest.
+</p>
+<p>  
+  Otherwise, obtain the code from <a href="http://github.com/genovese/make-hash">http://github.com/genovese/make-hash</a>,
+  cloning the repository or downloading and unpacking the tar/zip archive.
+  Either load it directly or put the <code>make-hash</code> subdirectory
+  where ASDF (www.cliki.net/asdf) can find the <code>.asd</code> file.
+  With ASDF, call <code>(asdf:load-system "make-hash")</code> to load the
+  package.
+</p>
+<p>
+  For both quicklisp and ASDF, you may want to call
+  <code>(use-package :make-hash)</code> to import the main functions. If you want to
+  run the tests, which are in the package <code>make-hash-tests</code>, do the
+  following.
+</p>
+<ul>
+<li>In quicklisp:
+</li>
+</ul>
+
+
+
+
+<pre class="src src-lisp">(ql:quickload <span style="color: #8b2252;">"make-hash"</span>)
+(ql:quickload <span style="color: #8b2252;">"make-hash-tests"</span>)
+(asdf:test-system <span style="color: #8b2252;">"make-hash-tests"</span>)
+</pre>
+
+
+
+
+<ul>
+<li>With ASDF alone:
+</li>
+</ul>
+
+
+
+
+<pre class="src src-lisp">(asdf:load-system <span style="color: #8b2252;">"make-hash"</span>)
+(asdf:load-system <span style="color: #8b2252;">"make-hash-tests"</span>)
+(asdf:test-system <span style="color: #8b2252;">"make-hash-tests"</span>)
+</pre>
+
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Examples </h2>
+<div class="outline-text-2" id="text-3">
+
+
+<p>
+  The use of <code>make-hash</code> is pretty straightforward, and I think it will be
+  clearer to see some examples before looking at the detailed specifications.
+  It might help to scan these examples quickly on first read through and
+  then come back after reading the specification in the ensuing sections.
+  Here, I will assume that the predefined formats and defaults are in
+  effect, although these can be overridden if desired.
+</p>
+<ol>
+<li>No Initialization 
+
+<p>
+     Use exactly like <code>make-hash-table</code>, with all standard or
+     implementation-dependent keyword arguments.
+</p>
+
+
+
+<pre class="src src-lisp">(make-hash)
+(make-hash <span style="color: #7a378b;">:test</span> #'equal)
+(make-hash <span style="color: #7a378b;">:size</span> 128 <span style="color: #7a378b;">:rehash-size</span> 1.75)
+</pre>
+
+
+
+
+</li>
+<li>(Shallow) Copying an existing hash table
+
+
+
+
+<pre class="src src-lisp">(make-hash <span style="color: #7a378b;">:initial-contents</span> eql-hash-table)
+(make-hash <span style="color: #7a378b;">:test</span> (hash-table-test other-hash-table)
+           <span style="color: #7a378b;">:initial-contents</span> other-hash-table)
+</pre>
+
+
+
+
+</li>
+<li>Initializing from simple sequences containing keys and values
+
+
+
+
+<pre class="src src-lisp">(make-hash <span style="color: #7a378b;">:initial-contents</span> '(a 1 b 2 c 3 d 1 e 2 f 3 g 4))
+(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:flat</span>
+           <span style="color: #7a378b;">:initial-contents</span> '(a 1 b 2 c 3 d 1 e 2 f 3 g 4))
+(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:pairs</span>
+           <span style="color: #7a378b;">:initial-contents</span> '((a . 1) (b . 2) (c . 3)
+                               (d . 1) (e . 2) (f . 3) (g . 4)))
+(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:lists</span>
+           <span style="color: #7a378b;">:initial-contents</span> '((a 1) (b 2) (c 3)
+                               (d 1) (e 2) (f 3) (g 4)))
+(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:vectors</span>
+           <span style="color: #7a378b;">:initial-contents</span> '(#(a 1) #(b 2) #(c 3)
+                               #(d 1) #(e 2) #(f 3) #(g 4)))
+(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:seqs</span>
+           <span style="color: #7a378b;">:initial-contents</span> '((a 1) #(b 2) (c 3)
+                               #(d 1) (e 2) #(f 3) #(g 4)))
+</pre>
+
+
+
+
+<p>
+     Here <code>:flat</code> is the default format, and the result in all these
+     cases maps <code>a</code> &rarr; 1, <code>b</code> &rarr; 2, <code>c</code> &rarr; 3, <code>d</code> &rarr; 1, <code>e</code> &rarr; 2,
+     <code>f</code> &rarr; 3, and <code>g</code> &rarr; 4.
+</p>
+</li>
+<li>Initializing from separate sequences of keys and values
+
+
+
+
+<pre class="src src-lisp">(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:keychain</span>
+           <span style="color: #7a378b;">:initial-contents</span> '(a b c d e f g)
+           <span style="color: #7a378b;">:init-data</span>        '(1 2 3 1 2 3 4))
+(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:keychain</span>
+           <span style="color: #7a378b;">:initial-contents</span> '(a b c d e f g)
+           <span style="color: #7a378b;">:init-data</span>        #(1 2 3 1 2 3 4))
+</pre>
+
+
+
+
+<p>
+     The resulting tables are the same as in the last example.
+</p>
+</li>
+<li>Creating a hash table of keys and counts
+
+<p>
+     Given a sequence of objects, create a hash table with the unique
+     objects as keys and the frequency counts in the sequence as values.
+</p>
+
+
+
+<pre class="src src-lisp">(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:keybag</span>
+           <span style="color: #7a378b;">:initial-contents</span> '(a b d d e c b a a e c c d a a c c e c c))
+(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:keybag</span>
+           <span style="color: #7a378b;">:initial-contents</span> #(a b d d e c b a a e c c d a a c c e c c))
+</pre>
+
+
+
+
+<p>
+     The results map <code>a</code> &rarr; 5, <code>b</code> &rarr; 2, <code>c</code> &rarr; 7, <code>d</code> &rarr; 3, and <code>e</code> &rarr; 3.
+</p>
+</li>
+<li>Building a hash from selected keys in another associative map or database
+
+<p>
+     Here, the <code>:initial-contents</code> is a sequence of keys, and the corresponding
+     values are the values for those keys in the map given as <code>:init-data</code>,
+     or the <code>:init-default</code> if none exists.
+</p>
+<p>
+     Let <code>turtles</code> be the hash table above from CLtL2. Suppose
+     <code>turtles-alist</code> is an associative list with the same data and that
+     <code>turtles-database-reader</code> is a function that reads an associated record
+     from a database. We can extract a ``sub-hash'' whose keys are those
+     corresponding to mutant, ninja turtles as follows.
+</p>
+
+
+
+<pre class="src src-lisp">(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:keys</span>
+           <span style="color: #7a378b;">:initial-contents</span> '(leonardo donatello raphael michaelangelo)
+           <span style="color: #7a378b;">:init-data</span> turtles)
+(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:keys</span>
+           <span style="color: #7a378b;">:initial-contents</span> '(leonardo donatello raphael michaelangelo)
+           <span style="color: #7a378b;">:init-data</span> turtles-alist)
+(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:keys</span>
+           <span style="color: #7a378b;">:initial-contents</span> '(leonardo donatello raphael michaelangelo)
+           <span style="color: #7a378b;">:init-data</span> turtles-database-reader)
+</pre>
+
+
+
+
+</li>
+<li>Initializing from repeated calls to a function
+
+<p>
+     The following initializes the hash table from a <i>simple</i> CSV
+     (comma-separated value) file, with no commas within fields, using the
+     first field as the key and the list of remaining fields as the value.
+     The function <code>parse-csv-line</code> acts on one line at a time, skipping and
+     either initializes or skips using the return value convention described
+     below.
+</p>
+
+
+
+<pre class="src src-lisp">(use-package <span style="color: #7a378b;">:cl-ppcre</span>)
+
+(<span style="color: #7f007f;">defun</span> <span style="color: #0000ff;">parse-csv-line</span> (stream)
+  (<span style="color: #7f007f;">let</span> ((line (read-line stream nil)))
+    (<span style="color: #7f007f;">cond</span>
+      ((null line)
+       (values nil nil nil))
+      ((scan <span style="color: #8b2252;">"^\\s*$"</span> line)
+       (values t t t))
+      (t
+       (<span style="color: #7f007f;">let</span> ((fields
+              (split <span style="color: #8b2252;">"\\s*,\\s*"</span>  line <span style="color: #7a378b;">:limit</span> most-positive-fixnum)))
+         (values (first fields) (rest fields) nil))))))
+
+(<span style="color: #7f007f;">with-open-file</span> (s <span style="color: #8b2252;">"data.csv"</span> <span style="color: #7a378b;">:direction</span> <span style="color: #7a378b;">:input</span> <span style="color: #7a378b;">:if-does-not-exist</span> nil)
+  (make-hash <span style="color: #7a378b;">:test</span> #'equal <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:function</span>
+             <span style="color: #7a378b;">:initial-contents</span> #'parse-csv-line <span style="color: #7a378b;">:init-data</span> (list s)))
+</pre>
+
+
+
+
+<p>
+     The following initializes the hash table from the key-value pairs in an
+     INI file. The function <code>parse-ini-line</code> is acts on one line at a time and
+     either initializes or skips using the return value convention described
+     below.
+</p>
+
+
+
+<pre class="src src-lisp">(use-package <span style="color: #7a378b;">:cl-ppcre</span>)
+
+(<span style="color: #7f007f;">let</span> ((ini-line-re
+       (create-scanner
+        <span style="color: #8b2252;">"^\\s*(?:|;.*|\\[([</span><span style="color: #8b2252;">^</span><span style="color: #8b2252;">]]+)\\]|(\\w+)\\s*=\\s*(.*?))?\\s*$"</span>))
+      (current-section-name <span style="color: #8b2252;">""</span>))
+  (<span style="color: #7f007f;">defun</span> <span style="color: #0000ff;">parse-ini-line</span> (stream)
+    (<span style="color: #7f007f;">let</span> ((line (read-line stream nil)))
+      (<span style="color: #7f007f;">unless</span> line
+        (setf current-section-name <span style="color: #8b2252;">""</span>)
+        (<span style="color: #7f007f;">return-from</span> parse-ini (values nil nil nil)))
+      (<span style="color: #7f007f;">multiple-value-bind</span> (beg end reg-begs reg-ends)
+          (scan ini-line-re line)
+        (<span style="color: #7f007f;">declare</span> (ignorable end))
+        (<span style="color: #7f007f;">unless</span> beg
+          (<span style="color: #ff0000; font-weight: bold;">error</span> <span style="color: #8b2252;">"Improperly formatted INI line: ~A"</span> line))
+        (<span style="color: #7f007f;">if</span> (and (&gt; (length reg-begs) 2) (aref reg-begs 1))
+            (values
+             (concatenate 'string
+                          current-section-name <span style="color: #8b2252;">"/"</span>
+                          (subseq line (aref reg-begs 1) (aref reg-ends 1)))
+             (subseq line (aref reg-begs 2) (aref reg-ends 2))
+             nil)
+            (<span style="color: #7f007f;">progn</span>
+              (<span style="color: #7f007f;">when</span> (and (&gt; (length reg-begs) 0) (aref reg-begs 0))
+                (setf current-section-name
+                      (subseq line (aref reg-begs 0) (aref reg-ends 0))))
+              (values t t t)))))))
+
+(<span style="color: #7f007f;">with-open-file</span> (s <span style="color: #8b2252;">"config.ini"</span> <span style="color: #7a378b;">:direction</span> <span style="color: #7a378b;">:input</span> <span style="color: #7a378b;">:if-does-not-exist</span> nil)
+  (make-hash <span style="color: #7a378b;">:test</span> #'equal <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:function</span>
+             <span style="color: #7a378b;">:initial-contents</span> #'parse-ini-line <span style="color: #7a378b;">:init-data</span> (list s)))
+</pre>
+
+
+
+
+</li>
+<li>Transforming a hash built from a sequence of keys and values
+
+<p>
+     Passing a function as <code>:init-data</code> can be used to
+     transform the initial contents as the hash is being initialized.
+</p>
+
+
+
+<pre class="src src-lisp">(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:flat</span>
+           <span style="color: #7a378b;">:initial-contents</span> '(a 1 b 2 c 3 d 1 e 2 f 3 g 4)
+           <span style="color: #7a378b;">:init-data</span> (<span style="color: #7f007f;">lambda</span> (k v) (values k (* v v) nil)))
+(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:pairs</span>
+           <span style="color: #7a378b;">:initial-contents</span> '((a . 1) (b . 2) (c . 3)
+                               (d . 1) (e . 2) (f . 3) (g . 4))
+           <span style="color: #7a378b;">:init-data</span> (<span style="color: #7f007f;">lambda</span> (k v)
+                        (values (intern (symbol-name k) <span style="color: #7a378b;">:keyword</span>)
+                                (* v v))))
+(<span style="color: #7f007f;">let</span> ((scratch (make-hash)))
+  (make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:lists</span>
+             <span style="color: #7a378b;">:initial-contents</span> '((a 1) (b 2) (c 3)
+                                 (d 1) (e 2) (f 3) (g 4))
+             <span style="color: #7a378b;">:init-data</span> (<span style="color: #7f007f;">lambda</span> (k v)
+                          (values v
+                                  (setf (gethash v scratch)
+                                        (cons k (gethash v scratch nil)))
+                                  nil))))
+</pre>
+
+
+
+
+<p>
+     The first is a hash that maps <code>a</code> and <code>d</code> to 1, <code>b</code> and <code>e</code> to 4, <code>c</code> and <code>f</code> to 9,
+     and <code>g</code> to 16. The second is the same except that the keys are the
+     keywords with the same symbol-name (e.g., :a, :b). The third 
+     reverses the given alist, accumulated repeated values in a list:
+     1 &rarr; <code>(d a)</code>, 2 &rarr; <code>(e b)</code>, 3 &rarr; <code>(f c)</code>, and 4 &rarr; <code>(g)</code>.
+</p>
+</li>
+<li>Transforming an existing hash table or alist
+
+
+
+
+<pre class="src src-lisp">(<span style="color: #7f007f;">defun</span> <span style="color: #0000ff;">lastcar</span> (list)
+  (car (last list)))
+
+(<span style="color: #7f007f;">defvar</span> <span style="color: #a0522d;">*pet-hash*</span>
+  (make-hash <span style="color: #7a378b;">:initial-contents</span>
+             '(dog  (mammal pet loyal 3) cat (mammal pet independent 1)
+               eagle 0 cobra 0
+               goldfish (fish pet flushed 1) hamster (mammal pet injured sad 2)
+               corn-snake (reptile pet dog-like 1) crab (crustacean quiet 4)
+               grasshopper (insect methusala 1) black-widow 0)))
+
+(make-hash <span style="color: #7a378b;">:initial-contents</span> *pet-hash*
+           <span style="color: #7a378b;">:init-data</span> (make-hash-transformer <span style="color: #7a378b;">:value</span> #'lastcar #'atom))
+</pre>
+
+
+
+
+<p>
+     The result maps <code>dog</code> &rarr; 3, <code>cat</code> &rarr; 1, <code>goldfish</code> &rarr; 1, <code>hamster</code> &rarr; 2,
+     <code>corn-snake</code> &rarr; 1, <code>grasshopper</code> &rarr; 1, and <code>crab</code> &rarr; 4. If <code>*pet-hash*</code>
+     had been an alist instead of a hash table, the call to <code>make-hash</code>
+     would be unchanged. Note that lastcar is not called on an entry unless
+     atom returns <code>nil</code>.
+</p>
+</li>
+<li>Transforming a keybag
+
+<p>
+     Create a hash recording counts for each key (see example 7) but filter
+     on some constraint. A function for <code>:init-data</code> takes the key and count
+     and sets the values according to the return convention described below.
+     With a vector for <code>:init-data</code>, the count is an index into the vector
+     for the new value. With a hash table, the count is used as key to
+     lookup the new value.
+</p>
+
+
+
+<pre class="src src-lisp">(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:keybag</span>
+           <span style="color: #7a378b;">:initial-contents</span> #(a b d d e c b a a e c c d a a c c e c c)
+           <span style="color: #7a378b;">:init-data</span> (<span style="color: #7f007f;">lambda</span> (key count) (values key count (&lt;= count 3))))
+(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:keybag</span>
+           <span style="color: #7a378b;">:initial-contents</span> #(a b d d e c b a a e c c d a a c c e c c)
+           <span style="color: #7a378b;">:init-data</span> #(zero one two three four)
+           <span style="color: #7a378b;">:init-default</span> 'more-than-four)
+(make-hash <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:keybag</span>
+           <span style="color: #7a378b;">:initial-contents</span> #(a b d d e c b a a e c c d a a c c e c c)
+           <span style="color: #7a378b;">:init-data</span> (make-hash <span style="color: #7a378b;">:initial-contents</span> '(3 <span style="color: #8b2252;">"You're out!"</span>))
+           <span style="color: #7a378b;">:init-default</span> <span style="color: #8b2252;">"Whatever!"</span>)
+</pre>
+
+
+
+
+<p>
+     The first gives a hash a &rarr; 5, b &rarr; 2, c &rarr; 7, d &rarr; 3, e &rarr; 3.
+     The second gives a hash a &rarr; more-than-four, b &rarr; two, c &rarr; more-than-four,
+     d &rarr; three, e &rarr; three. And the third gives a hash with a, b, and c
+     mapping to the string "Whatever!" and d and e mapping to "You're out!".
+</p>
+</li>
+<li>Creating Hash Factories
+
+<p>
+     Hash factories are shortcuts that encapsulate a specified set of hash creation options,
+     primarily for use with literal hash creation with sequence-style init formats.
+     The factories are functions that package their arguments (&amp;rest style) and
+     use the resulting list as the <code>:initial-contents</code> argument to <code>make-hash</code>
+     with the given options. The difference between <code>define-hash-factory</code> and
+     <code>make-hash-factory</code> is that the former defines a toplevel function, whereas
+     the latter returns an anonymous function.
+</p>
+
+
+
+<pre class="src src-lisp">(<span style="color: #7f007f;">define-hash-factory</span> qhash
+    <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:flat</span>
+    <span style="color: #7a378b;">:test</span> #'eq <span style="color: #7a378b;">:size</span> 128
+    <span style="color: #7a378b;">:documentation</span> <span style="color: #8b2252;">"Construct moderate size hash tables for symbols."</span>)
+
+(qhash 'a 1 'b 2 'c 3 'd 4 'x 100 'y -100 'z 0)
+(apply #'qhash '(a 1 b 2 c 3 d 4 x 100 y -100 z 0))
+
+(<span style="color: #7f007f;">define-hash-factory</span> ahash
+    <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:pairs</span>
+    <span style="color: #7a378b;">:init-data</span> (<span style="color: #7f007f;">lambda</span> (k v)
+                 (<span style="color: #7f007f;">if</span> (stringp k) (intern (string-upcase k)) k))
+    <span style="color: #7a378b;">:documentation</span> <span style="color: #8b2252;">"Alist-&gt;hash, converting string keys to symbols."</span>)
+
+(ahash (<span style="color: #8b2252;">"foo"</span> 10) (<span style="color: #8b2252;">"bar"</span> 20) (<span style="color: #8b2252;">"zap"</span> 30))
+(apply #'ahash '((a . 1) (b . 2) (c . 3) (<span style="color: #8b2252;">"d"</span> . 4) (<span style="color: #8b2252;">"foo"</span> . <span style="color: #8b2252;">"bar"</span>)))
+
+(<span style="color: #7f007f;">let</span> ((h (make-hash-factory <span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:keys</span> <span style="color: #7a378b;">:init-data</span> *big-hash*)))
+  (apply h key1 key2 key3 key4)) <span style="color: #b22222;">; </span><span style="color: #b22222;">quick subhash of *big-hash*</span>
+</pre>
+
+
+
+
+</li>
+<li>Portable Reader Factories
+
+<p>
+     It may be desirable to use reader macros to stand-in for particular
+     hash table constructors. These are hash factories that are installed in
+     a readtable using <code>install-hash-reader</code> at toplevel. Both dispatched
+     and raw delimited forms are supported, and the installer can accept a
+     list of options or an existing factory.
+</p>
+<p>
+     Here are three separate uses yielding <code>:a</code>\to1, <code>:b</code>\to2, <code>:c</code>\to3, <code>:d</code>\to4.
+</p>
+
+
+
+<pre class="src src-lisp">(install-hash-reader ())  <span style="color: #b22222;">; </span><span style="color: #b22222;">default settings and options</span>
+#{<span style="color: #7a378b;">:a</span> 1 <span style="color: #7a378b;">:b</span> 2 <span style="color: #7a378b;">:c</span> 3 <span style="color: #7a378b;">:d</span> 4}   
+</pre>
+
+
+
+
+
+
+
+<pre class="src src-lisp">(install-hash-reader '(<span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:pairs</span>)
+                     <span style="color: #7a378b;">:use-dispatch</span> t <span style="color: #7a378b;">:open-char</span> #\[ <span style="color: #7a378b;">:close-char</span> #\])
+#['(<span style="color: #7a378b;">:a</span> . 1) '(<span style="color: #7a378b;">:b</span> . 2) '(<span style="color: #7a378b;">:c</span> . 3) '(<span style="color: #7a378b;">:d</span> . 4)] 
+</pre>
+
+
+
+
+
+
+
+<pre class="src src-lisp">(install-hash-reader '(<span style="color: #7a378b;">:init-format</span> <span style="color: #7a378b;">:lists</span>)
+                     <span style="color: #7a378b;">:use-dispatch</span> nil <span style="color: #7a378b;">:open-char</span> #\{ <span style="color: #7a378b;">:close-char</span> #\})
+{'(<span style="color: #7a378b;">:a</span> 1) '(<span style="color: #7a378b;">:b</span> 2) '(<span style="color: #7a378b;">:c</span> 3) '(<span style="color: #7a378b;">:d</span> 4)} 
+</pre>
+
+
+
+
+<p>
+     This accepts a readtable to modify (current readtable by default) and works
+     well with the :named-readtables package.
+</p></li>
+</ol>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Creating Hash Tables </h2>
+<div class="outline-text-2" id="text-4">
+
+
+<p>
+  The function <code>make-hash</code> is an interface to the CL standard function
+  <code>make-hash-table</code> that also allows flexible initialization. It accepts all
+  the standard and implementation-dependent keyword arguments that the
+  standard <code>make-hash-table</code> does but also accepts a few additional keyword
+  arguments that can specify the initial contents of the table (analogously
+  to the CL standard function <code>make-array</code>). The operation of the make-hash
+  initializer is designed to handle all the common cases easily while
+  enabling powerful abstractions where needed. See the Examples section
+  below for examples.
+</p>
+<p>
+  The new keyword arguments are:
+</p>
+<ul>
+<li><code>:initial-contents</code> <i>object</i>
+
+<p>      
+      If the supplied object is non-nil, the object is used to initialize
+      the created hash table in accordance with the <code>:init-format</code> argument.
+      For some formats, the <code>:init-data</code> argument may also be needed to
+      supply supplementary information for the initializer. The built-in
+      formats support the cases where object is either a hash table or
+      sequence from which the keys and values can be extracted. See the
+      subsection below for a detailed description of the possibilities.
+</p>
+</li>
+<li><code>:init-format</code> <i>keyword</i>
+
+<p>  
+      A keyword specifying the structure of the initialization contents
+      and auxilliary data given by the <code>:initial-contents</code> and <code>:init-data</code>
+      arguments. Built-in support is provided for :hash, :flat, :pairs, 
+      :lists, :vectors, :seqs, :keys, :keychain, :keybag, and :function.
+      These are described in detail in the subsection below. 
+</p>
+<p>      
+      When an initializer format is not supplied, it is computed by
+      calling the generic function <code>hash-initializer-default-format</code> on
+      the given <code>:initial-contents</code> object. A methods for this function
+      should be defined whenever the function <code>initialize-hash</code> is
+      extended to handle a new class of <code>:initial-contents</code> objects. Methods
+      can be overridden to change the default used in existing cases.
+</p>
+</li>
+<li><code>:init-data</code> <i>object</i>
+
+<p>  
+      Auxilliary data used for initialization with some formats. Its
+      structure and meaning depends on the value of <code>:init-format</code>; as
+      described in the subsection below.
+</p>
+</li>
+<li><code>:init-default</code> <i>value</i>
+
+<p>  
+      Default value to use in indirect initialization when the value for 
+      the given key cannot be determined from the <code>:initial-contents</code> and
+      <code>:init-data</code> for the particular <code>:init-format</code> supplied.
+</p></li>
+</ul>
+
+
+<p>
+  If no :initial-contents argument is supplied, the hash table is not
+  initialized, and <code>make-hash</code> behaves exactly like the standard
+  function <code>make-hash-table</code>. For many formats, initialization only
+  requires an :initial-contents argument. See <a href="#sec-3">Examples</a> for more.
+</p>
+
+</div>
+
+<div id="outline-container-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> Functions as <code>:init-data</code> (or <code>:initial-contents</code>) </h3>
+<div class="outline-text-3" id="text-4-1">
+
+
+<p>
+   For most of the pre-defined formats, a function can be
+   passed as the <code>:init-data</code>, and with the <code>:function</code> format,
+   a can be passed as the <code>:initial-contents</code> as well.
+   These functions are expected to return three values
+       <i>KEY VALUE [BAD-VALUE]</i>
+   that are used (under some conditions) to create a new key-value
+   entry in the hash table being initialized.  Here, BAD-VALUE
+   is a <b>ternary</b> value: nil (or missing) means to use KEY and VALUE
+   as is; t means to skip creating this entry entirely, and any
+   other non-nil value means to associate KEY to the specified
+   <code>:init-default</code> value <i>instead</i> of VALUE.
+</p>
+<p>
+   In the description of the predefined formats below, such function
+   arguments are used in one of three ways:
+</p>
+<ol>
+<li>Entry transformation: <i>INIT-KEY INIT-VALUE -&gt; KEY VALUE [BAD-VALUE]</i>
+
+<p>      
+      The key and value specified by <code>:initial-contents</code> (<i>INIT-KEY INIT-VALUE</i>)
+      are passed to the function and the return values used as described above.
+      (Formats <code>:hash</code>, <code>:flat</code>, <code>:pairs</code>, <code>:lists</code>, <code>:vectors</code>, <code>:seqs</code>.)
+</p>
+</li>
+<li>Key transformation: <i>INIT-KEY -&gt; KEY VALUE [BAD-VALUE]</i>
+
+<p>      
+      With format <code>:keys</code>, the key specified by <code>:initial-contents</code> is
+      passed to the function and the return values used as described above.
+</p>
+</li>
+<li>Entry generation: <i>&amp;rest ARGS -&gt; KEY VALUE [BAD-VALUE]</i>
+
+<p>      
+      With format <code>:function</code>, the <code>:initial-contents</code> argument is a function.
+      This function is applied repeatedly to <i>ARGS</i> and the return values
+      used as described above. However, in this case, the first time
+      that KEY is nil, initialization stops.
+</p></li>
+</ol>
+
+
+<p>
+   See also the documentation for the function <code>make-hash-transformer</code>
+   which creates a function suitable for use in this way from a simpler
+   function on keys or entries.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> Predefined Initialization Formats </h3>
+<div class="outline-text-3" id="text-4-2">
+
+
+<p>
+   The <code>:init-format</code> argument is a keyword that determines how the
+   keyword arguments <code>:initial-contents</code> and <code>:init-data</code> are interpreted.
+   If <code>:init-format</code> is not supplied, the default format is determined
+   by the type of <code>:initial-contents</code>.
+</p>
+<p>
+   There are four basic cases in the pre-defined initialization support:
+</p>
+<ol>
+<li>Initializing from an existing hash table
+
+<p>      
+      When <code>:init-format</code> is <code>:hash</code> or by default if <code>:initial-contents</code> is
+      a hash-table, the new hash table is initialized by a shallow copy of
+      the initial contents table, with shared structure in keys and values.
+      If <code>:init-data</code> is a function, that function is used for entry
+      transformation of the hash table given in <code>:initial-contents</code>.
+</p>
+</li>
+<li>Initializing from a sequence (or sequences) specifying key-value pairs.
+
+<p>      
+      When <code>:init-format</code> is <code>:flat</code>, <code>:pairs</code>, <code>:lists</code>, <code>:vectors</code>, or
+      <code>:seqs</code>, the <code>:initial-contents</code> should be a sequence that specifies a
+      collection of key-value pairs. The only difference among these formats
+      is the expected structure of the sequence's elements. For <code>:flat</code>, the
+      keys and values alternate; for <code>:pairs</code>, it is a sequence of cons
+      pairs (e.g., an alist); for <code>:lists</code>, <code>:vectors</code>, and <code>:seqs</code>, it is a
+      sequence of lists, vectors, or arbitrary sequences respectively of
+      which the first two elements of each give the corresponding key and
+      value. In these cases, if <code>:init-data</code> is nil or missing, the key-value
+      pairs are used as is; if <code>:init-data</code> is a function, the function is
+      used for entry transformation, as described above, for each pair.
+</p>
+<p>   
+      When <code>:init-format</code> is <code>:keychain</code>, the <code>:initial-contents</code> should
+      be a sequence of keys and <code>:init-data</code> should be a sequence of 
+      corresponding values <i>in the same order</i>. The table is initialized
+      with the resultant key-value pairs.
+</p>
+<p>
+      When <code>:init-format</code> is <code>:keys</code>, the <code>:initial-contents</code> should be a
+      sequence of keys. The corresponding value is obtained by looking
+      up the key in the hash table, alist, or function (via key mapping,
+      see above) that is passed as <code>:init-data</code>, which in this case
+      is required.
+</p>
+</li>
+<li>Initializing from a bag/multiset of keys.
+
+<p>      
+      When <code>:init-format</code> is <code>:keybag</code>, the <code>:initial-contents</code> should be a
+      sequence representing a <i>multiset</i> (a collection with possibly
+      repeated elements) of keys. The hash table is initialized to map the
+      unique elements from that multiset (as keys) to the number of times
+      that element appears in the multiset (as values).
+</p>
+<p>      
+      In this case, if <code>:init-data</code> is a vector, hash table, or function,
+      the count is used to find the corresponding value by indexing into the
+      vector, looking up the value associated with count in the data
+      hash-table, or calling the function with the key and count. When a
+      value cannot be found, the default is used instead, subject to the
+      value of BAD-VALUE in the function case.
+</p>
+</li>
+<li>Initializing from a function.
+
+<p>      
+      When <code>:init-format</code> is <code>:function</code> or <code>:initial-contents</code> is a function,
+      the hash table is initialized by using the function for entry generation
+      as described above.
+</p></li>
+</ol>
+
+
+<p>
+   See also the documentation for <code>make-hash</code> for a relatively succinct
+   table describing these options. Keep in mind that the interpretation of
+   the formats is specified by methods of the <code>initialize-hash</code> generic
+   function, and the default formats for different <code>:initial-contents</code> types
+   by methods of the <code>hash-initializer-default-format</code>.
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> Defining Custom Initialization Formats </h2>
+<div class="outline-text-2" id="text-5">
+
+
+<p>
+  Initialization by <code>make-hash</code> is controlled by the generic function
+  <code>initialize-hash</code>. Defining new methods for this function, or overriding
+  existing methods, makes it easy to extend the hash table initialization,
+  to add or modify formats, change behaviors, and so forth.
+</p>
+<p>
+  The function <code>initialize-hash</code> takes five arguments: the hash table being
+  initialized, the format specifier, the initial contents source object, the
+  auxilliary data (<code>:init-data</code>) object, and the default value (<code>:init-default</code>).
+  The format is usually a keyword with eql specialization. The contents
+  source and data object are specialized on type.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> Specifying Default Formats </h2>
+<div class="outline-text-2" id="text-6">
+
+
+<p>
+  When no <code>:init-format</code> argument is given to <code>make-hash</code>, the default format
+  is determined by calling a suitable method of the generic function
+  <code>hash-initializer-default-format</code>, passing the <code>:initial-contents</code> argument.
+  The predefined methods use format <code>:hash</code> given a hash table, <code>:flat</code> given
+  a sequence, and <code>:function</code> given a function. More flexibility may be
+  desired in particular applications.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> Hash Table Factories </h2>
+<div class="outline-text-2" id="text-7">
+
+
+<p>
+  When specific patterns of hash table construction options are used repeatedly,
+  it can be helpful to encapsulate those patterns in a simple way.
+  Hash table factories are shortcut functions that create a hash table using
+  prespecified construction options. Any of the keyword arguments to <code>make-hash</code>,
+  except for <code>:initial-contents</code>, can be passed to the factory constructor
+  and will be used for creating the hash table when the factory is called.
+  The arguments in the factory call are packaged <code>&amp;rest</code>-style in a list
+  and used as the <code>:initial-contents</code>. There are two factory constructors:
+  <code>define-hash-factory</code> creates a toplevel function of a given name
+  and <code>make-hash-factory</code> creates an anonymous function.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-8" class="outline-2">
+<h2 id="sec-8"><span class="section-number-2">8</span> Reader Representations </h2>
+<div class="outline-text-2" id="text-8">
+
+
+<p>
+  Similarly, it might be desirable for the hash factories to be represented
+  by syntax at read time via reader macros. The macro <code>install-hash-reader</code>
+  updates a given readtable (the current readtable by default) so that
+  a dispatched or raw delimited form creates a hash table. The effect
+  is identical to the use of the hash table factories, except syntactically.
+  Indeed, a factory can be passed directly to the <code>install-hash-reader</code>.
+</p>
+<p>
+  Calls to this macro must occur at toplevel to have effect. It is designed
+  to be as portable as possible and to work well with the named-readtables
+  package. Common examples would be the use of #{} or {} to represent hash
+  tables.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9" class="outline-2">
+<h2 id="sec-9"><span class="section-number-2">9</span> Dictionary </h2>
+<div class="outline-text-2" id="text-9">
+
+
+</div>
+
+<div id="outline-container-9-1" class="outline-3">
+<h3 id="sec-9-1"><span class="section-number-3">9.1</span> make-hash [Function] </h3>
+<div class="outline-text-3" id="text-9-1">
+
+
+<p>
+   <b>make-hash</b> <i>\&amp;key initial-contents init-format init-data init-default &hellip; &rarr; hash-table</i>
+</p>
+<p>
+   Creates, initializes if requested, and returns a new hash table.
+</p>
+<p>
+   Keyword options include all those of the standard <code>make-hash-table</code>, any
+   extension options allowed by the given implementation, and the additional
+   keyword options to control initialization: <code>:initial-contents</code>, the main
+   source for information filling the table; <code>:init-format</code>, a keyword
+   specifying how the initialization options are interpreted; <code>:init-data</code>,
+   auxilliary data needed for initialization in some formats; and
+   <code>:init-default</code>, a default value used when the value for a key cannot be
+   initialized. See the description above in <a href="#sec-4">Creating Hash Tables</a>. Users can
+   support other types/configurations (or alter the default handling) by
+   extending the generic function <code>initialize-hash</code> in this package; see
+   <a href="#sec-5">Defining Custom Initialization Formats</a>.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9-2" class="outline-3">
+<h3 id="sec-9-2"><span class="section-number-3">9.2</span> make-hash-transformer [Function] </h3>
+<div class="outline-text-3" id="text-9-2">
+
+
+<p>
+   <b>make-hash-transformer</b> <i>domain function &amp;optional badp &rarr; function</i>
+</p>
+<p>
+   Transform FUNCTION to be suitable for use as the <code>:init-data</code> (or
+   <code>:initial-contents</code>) argument to <code>make-hash</code>. DOMAIN specifies the
+   signature of FUNCTION and is one of the keywords <code>:key</code>, <code>:value</code>, or
+   <code>:entry</code>, indicating that FUNCTION takes a key, a value, or a key and a
+   value, repectively. BADP is a function with the same argument signature
+   as FUNCTION that follows the return convention described <a href="#sec-4-1">above</a>.
+   Specifically, it returns a ternary value: nil means that the transformed
+   entry should be used as is, t means that the entry should be skipped, and
+   any other non-nil value means that the key should be used with a default.
+   Note that FUNCTION is <i>not</i> called for an entry if BADP returns a non-nil
+   value.
+</p>
+<p>
+   The returned function accepts a key and a value (the value is optional
+   with DOMAIN :key) and returns three values: the key, the value, and the
+   bad-value ternary for that entry.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9-3" class="outline-3">
+<h3 id="sec-9-3"><span class="section-number-3">9.3</span> initialize-hash [Generic Function] </h3>
+<div class="outline-text-3" id="text-9-3">
+
+
+<p>
+   <b>initialize-hash</b> <i>table form source data default</i> 
+</p>
+<p>
+   Creates and adds an entry to TABLE using info of format FORM in SOURCE
+   and DATA. SOURCE contains the main contents, and DATA (optionally)
+   contains auxilliary information or objects required for initialization
+   for some formats. DEFAULT is the value that should be stored in the table
+   when an appropriate value associated to a key cannot be found. Adding or
+   redefining methods for this function allows extension or modification of
+   the initialization mechanism.
+</p>
+<p>
+   Note the convention, used by the predefined methods, that functions
+   passed as either SOURCE or DATA are expected to return three values,
+   using the convention described <a href="#sec-4-1">above</a>.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9-4" class="outline-3">
+<h3 id="sec-9-4"><span class="section-number-3">9.4</span> hash-initializer-default-format [Generic Function] </h3>
+<div class="outline-text-3" id="text-9-4">
+
+
+<p>
+   <b>hash-initializer-default-format</b> <i>source &rarr; keyword or error</i>
+</p>
+<p>
+   Selects an initializer format based on the given initial contents SOURCE.
+   For example, the default format for sequence contents is <code>:flat</code>;
+   to change it to <code>:pairs</code> so that an alist is expected as <code>:initial-contents</code>
+   by default, do the following:
+</p>
+
+
+
+<pre class="src src-lisp">(<span style="color: #7f007f;">defmethod</span> <span style="color: #0000ff;">hash-initializer-default-format</span> ((source list))
+  <span style="color: #7a378b;">:pairs</span>)
+</pre>
+
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-9-5" class="outline-3">
+<h3 id="sec-9-5"><span class="section-number-3">9.5</span> <code>*hash-factory-defaults*</code> [Special Variable] </h3>
+<div class="outline-text-3" id="text-9-5">
+
+
+<p>
+   Hash table creation options used as defaults by hash factory
+   constructors. These option specifications are passed last to make-hash by
+   the hash factories and so are overridden by options passed as explicit
+   arguments to the factory constructor.
+</p>
+<p>   
+   Changing this variable affects the options used by every hash factory
+   that does not fully specify its options. This includes default calls to
+   the reader constructors. Of particular note are the <code>:test</code> and
+   <code>:init-format</code> options.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9-6" class="outline-3">
+<h3 id="sec-9-6"><span class="section-number-3">9.6</span> define-hash-factory [Macro] </h3>
+<div class="outline-text-3" id="text-9-6">
+
+
+<p>
+   <b>define-hash-factory</b> <i>name &amp;key &hellip;hash-options&hellip;</i>
+</p>
+<p>
+   Create a hash-table factory NAME that calls <code>make-hash</code> with options
+   specified by given by the hash-options arguments. The defined
+   function packages its arguments as a list, which it passes as
+   the :initial-contents argument to `make-hash'.
+</p>
+<p>
+   The hash-options are alternating keyword-value pairs. The supplied
+   keyword arguments precede and thus override the options in
+   <code>*hash-factory-defaults*</code>, which is intended to allow one to use short
+   names or customized policies in simple calling patterns. Complex
+   initialization patterns may need the full power of `make-hash'
+   itself.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9-7" class="outline-3">
+<h3 id="sec-9-7"><span class="section-number-3">9.7</span> make-hash-factory [Function] </h3>
+<div class="outline-text-3" id="text-9-7">
+
+
+<p>
+   <b>make-hash-factory</b> <i>&amp;key &hellip;hash-options&hellip; &rarr; factory-function</i>
+</p>
+<p>
+   Like define-hash-factory but creates and returns an anonymous factory
+   function.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-9-8" class="outline-3">
+<h3 id="sec-9-8"><span class="section-number-3">9.8</span> install-hash-reader [Macro] </h3>
+<div class="outline-text-3" id="text-9-8">
+
+
+<p>
+   <b>install-hash-reader</b> <i>options &amp;key readtable use-dispatch allow-numbered-dispatch open-char close-char dispatch-char</i>  
+</p>
+<p>
+   Creates a hash table factory specified by OPTIONS and installs it
+   in READTABLE (the current readtable by default). To have effect,
+   this must be called at toplevel.
+</p>
+<p>
+   OPTIONS is either a list of keyword-value pairs (as would be passed to
+   <code>make-hash</code> or <code>make-hash-factory</code>) or a hash factory function.
+   READTABLE is a readtable object, <code>*readtable*</code> by default.
+</p>
+<p>
+   The keyword arguments control how the reader is modified as follows:
+</p>
+<ul>
+<li>USE-DISPATCH (t by default) determines whether the reader macro uses a
+     dispatch character DISPATCH-CHAR before OPEN-CHAR. If non-nil, a
+     dispatch character is used and is registered in READTABLE. If this is
+     nil, then OPEN-CHAR and CLOSE-CHAR will be a raw delimited construct.
+
+</li>
+<li>ALLOW-NUMBERED-DISPATCH (nil by default) allows a dispatched reader
+     macro to modify its hash test when given numeric arguments between
+     DISPATCH-CHAR and OPEN-CHAR. This only applies when USE-DISPATCH is
+     non-nil and when OPTIONS is a list, not a factory function. The goal
+     here is to make it easy to reuse reader factories in several contexts.
+
+<p>     
+     If nil, numbered dispatch is not supported. If t, numeric arguments
+     0, 1, 2, and 3 correspond to hash tests <code>eq</code>, <code>eql</code>, <code>equal</code>, and 
+     <code>equalp</code> respectively. If a sequence of symbols or functions, 
+     those functions are used for the hash test given a numeric
+     argument from 0 below the length of the sequence. In either case,
+     dispatch <i>without</i> a numeric argument uses the originally specified
+     options.
+</p>
+<p>
+     Note: This is <i>an experimental feature and may be discontinued in      future versions</i> if it proves more confusing than helpful.
+</p>
+</li>
+<li>OPEN-CHAR (default open-brace) is the character that delimits the
+     beginning of the hash-table contents. If USE-DISPATCH is non-nil,
+     this character must be preceeded by DISPATCH-CHAR, and optionally
+     a numeric argument.
+
+</li>
+<li>CLOSE-CHAR (default close-brace) is the character that delimits
+     the end of the hash-table contents.
+
+</li>
+<li>DISPATCH-CHAR (default \#) is the character used to indicate a
+     dispatched reader macro. When (and only when) USE-DISPATCH is non-nil.
+     READTABLE is modified to register this as as a dispatch and a
+     non-terminating macro character via <code>make-dispatch-macro-character</code>.
+     Note that there can be more than one dispatch character in a read
+     table.
+</li>
+</ul>
+
+
+</div>
+</div>
+</div>
+</div>
+
+<div id="postamble">
+<p class="date">Date: 30 Jun 2012</p>
+<p class="author">Author: Christopher Genovese (genovese@cmu.edu)</p>
+<p class="creator">Org version 7.7 with Emacs version 23</p>
+<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
+
+</div>
+</body>
+</html>

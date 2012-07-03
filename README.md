@@ -47,10 +47,15 @@ _Common Lisp the Language, Second Edition_ by Guy Steele (CLtL2).
     
     (do-something turtles)
 
-This is not horrible, but its 10 lines are mostly repeated boiler plate code that
-visually obscures the relationships in the table. And if this
-were a local definition, as in a let, even more syntactic infrastructure would
-be required (i.e., another level of let). Compare the above with
+This is not horrible by any means, but the repeated `setf`'s force an
+assignment-oriented block of statements and visually obscure the
+relationships in the table. And in practice, even more syntactic
+infrastructure is usually required (e.g., another level of let for a
+local definition, a loop for a larger hash table). While it is certainly
+a matter of taste which form one prefers, the goal of `make-hash' is to
+allow a more convenient, functional-style hash table construction that
+is consistent with constructors for lists, vectors, and arrays. Compare
+the above with
 
     (make-hash :size 9 :test 'eq
                :initial-contents '(howard-kaylan (musician lead-singer)

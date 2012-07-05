@@ -1,15 +1,16 @@
 ;;;; make-hash -- hash table creation with flexible, extensible initializers
 ;;;
 ;;; Copyright (C) 2012 Christopher R. Genovese, all rights reserved.
+;;; License: See file LICENSE.txt in this distribution.
 ;;;
 ;;; Author: Christopher Genovese <genovese@cmu.edu>
 ;;; Maintainer: Christopher R. Genovese <genovese@cmu.edu>
 ;;; URL: http://github.com/genovese/make-hash
 ;;;
-;;; Version: 1.0.0
-;;; Update#: 12
+;;; Version: 1.0.1
+;;; Update#: 14
 ;;; Created:      Wed 18 Apr 2012 at 09:55 EDT
-;;; Last-Updated: Mon 02 Jul 2012 at 21:29:33 EDT
+;;; Last-Updated: Thu 05 Jul 2012 at 14:21:50 EDT
 ;;; Updated By: Christopher R. Genovese
 
 

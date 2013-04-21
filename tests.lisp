@@ -6,10 +6,10 @@
 ;;; Maintainer: Christopher R. Genovese <genovese@cmu.edu>
 ;;; URL: http://github.com/genovese/make-hash
 ;;;
-;;; Version: 1.0.0
-;;; Update#: 5
+;;; Version: 1.0.1
+;;; Update#: 6
 ;;; Created:      Wed 18 Apr 2012 at 09:55 EDT
-;;; Last-Updated: Tue 03 Jul 2012 at 13:00:02 EDT
+;;; Last-Updated: Sun 21 Apr 2013 at 11:14 EDT
 ;;; Updated By: Christopher R. Genovese
 
 
@@ -772,7 +772,7 @@ coercable to a vector."
   
   (test keys-2
     "Initialize from a keys list and a hash table."
-    (let* ((table0 *symbols-hash*)
+    (let* ((table0 *symbol-hash*)
            (table1 (make-hash :test #'eq
                               :initial-contents (hash-to-keys table0)
                               :init-data table0
@@ -808,7 +808,7 @@ coercable to a vector."
   
   (test keys-6
     "Initialize from a keys vector and a hash table."
-    (let* ((table0 *symbols-hash*)
+    (let* ((table0 *symbol-hash*)
            (table1 (make-hash :test #'eq
                               :initial-contents (as-vector (hash-to-keys table0))
                               :init-data table0
@@ -838,7 +838,7 @@ coercable to a vector."
     (let* ((table0 (make-hash :initial-contents '()
                               :init-data (make-hash-transformer :key #'identity)
                               :init-format :keys))
-           (tablet *symbols-hash*)
+           (tablet *symbol-hash*)
            (table1 (make-hash :initial-contents (hash-to-keys tablet)
                               :init-data (make-hash-transformer :key
                                           (lambda (k) (gethash k tablet)))
@@ -963,7 +963,7 @@ coercable to a vector."
                               :test #'eql
                               :init-data (make-hash-transformer :key #'identity)
                               :init-format :keys))
-           (tablet *symbols-hash*)
+           (tablet *symbol-hash*)
            (table1 (make-hash :initial-contents (as-vector (hash-to-keys tablet))
                               :test #'eql
                               :init-data (make-hash-transformer :key
@@ -1582,7 +1582,7 @@ coercable to a vector."
     "Test delimited reader factories with default settings."
   (test delimited-0
     "Empty hash"
-    (is (zerop (hash-table-count #{}))))
+    (is (zerop (hash-table-count {}))))
   (test delimited-1
     "Simple flat, literal hash, eql test."
     (is (equalp {a 1 b 2 c 3}

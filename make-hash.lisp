@@ -7,10 +7,10 @@
 ;;; Maintainer: Christopher R. Genovese <genovese@cmu.edu>
 ;;; URL: http://github.com/genovese/make-hash
 ;;;
-;;; Version: 1.0.1
-;;; Update#: 14
+;;; Version: 1.0.2
+;;; Update#: 15
 ;;; Created:      Wed 18 Apr 2012 at 09:55 EDT
-;;; Last-Updated: Thu 05 Jul 2012 at 14:21:50 EDT
+;;; Last-Updated: Sun 21 Apr 2013 at 11:00 EDT
 ;;; Updated By: Christopher R. Genovese
 
 
@@ -23,7 +23,7 @@
   ((text :initarg :text :reader make-hash-error-text)
    (data :initarg :data :reader make-hash-error-data))
   (:documentation "Error encountered during hash table creation or initialization.")
-  (:default-initargs (:text "" :data nil))
+  (:default-initargs :text "" :data nil)
   (:report
    (lambda (c s)
      (format s (make-hash-error-text c) (make-hash-error-data c)))))

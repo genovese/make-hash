@@ -460,7 +460,7 @@ The new keyword arguments are:
 +   `:init-format` _keyword_
   
     A keyword specifying the structure of the initialization contents
-    and auxilliary data given by the `:initial-contents` and `:init-data`
+    and auxiliary data given by the `:initial-contents` and `:init-data`
     arguments. Built-in support is provided for :hash, :flat, :pairs, 
     :lists, :vectors, :seqs, :keys, :keychain, :keybag, and :function.
     These are described in detail in the subsection below. 
@@ -474,7 +474,7 @@ The new keyword arguments are:
   
 +   `:init-data` _object_
   
-    Auxilliary data used for initialization with some formats. Its
+    Auxiliary data used for initialization with some formats. Its
     structure and meaning depends on the value of `:init-format`; as
     described in the subsection below.
   
@@ -606,7 +606,7 @@ to add or modify formats, change behaviors, and so forth.
 
 The function `initialize-hash` takes five arguments: the hash table being
 initialized, the format specifier, the initial contents source object, the
-auxilliary data (`:init-data`) object, and the default value (`:init-default`).
+auxiliary data (`:init-data`) object, and the default value (`:init-default`).
 The format is usually a keyword with eql specialization. The contents
 source and data object are specialized on type.
 
@@ -658,7 +658,7 @@ extension options allowed by the given implementation, and the additional
 keyword options to control initialization: `:initial-contents`, the main
 source for information filling the table; `:init-format`, a keyword
 specifying how the initialization options are interpreted; `:init-data`,
-auxilliary data needed for initialization in some formats; and
+auxiliary data needed for initialization in some formats; and
 `:init-default`, a default value used when the value for a key cannot be
 initialized. See the description above in _Creating Hash Tables_. Users can
 support other types/configurations (or alter the default handling) by
@@ -691,7 +691,7 @@ bad-value ternary for that entry.
 
 Creates and adds an entry to TABLE using info of format FORM in SOURCE
 and DATA. SOURCE contains the main contents, and DATA (optionally)
-contains auxilliary information or objects required for initialization
+contains auxiliary information or objects required for initialization
 for some formats. DEFAULT is the value that should be stored in the table
 when an appropriate value associated to a key cannot be found. Adding or
 redefining methods for this function allows extension or modification of
